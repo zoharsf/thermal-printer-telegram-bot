@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import io
 import logging
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -58,6 +59,9 @@ class PrintDriver:
         driver.energy = int(self._energy * 0xFFFF)
 
         try:
+            logger.info("Resetting BLE adapter before connect...")
+            subprocess.run(["hciconfig", "hci0", "down"], check=False, timeout=5)
+            subprocess.run(["hciconfig", "hci0", "up"], check=False, timeout=5)
             logger.info("BLE connect start: %s", self._address)
             driver.connect(address=self._address)
             logger.info("BLE connected, printing...")
