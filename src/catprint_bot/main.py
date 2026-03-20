@@ -14,6 +14,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+from telegram.request import HTTPXRequest
 
 from catprint_bot.api.health import create_health_app
 from catprint_bot.bot.handlers import BotHandlers
@@ -93,9 +94,11 @@ async def run() -> None:
     )
 
     # Telegram bot application
+    request = HTTPXRequest(connect_timeout=30.0, read_timeout=30.0, write_timeout=30.0)
     app = (
         ApplicationBuilder()
         .token(settings.telegram_bot_token)
+        .request(request)
         .build()
     )
 
