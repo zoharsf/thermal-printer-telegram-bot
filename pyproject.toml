@@ -1,0 +1,23 @@
+[project]
+name = "catprint-bot"
+version = "0.1.0"
+description = "Telegram bot that prints messages on a Bluetooth thermal printer"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "python-telegram-bot[ext]>=21.0",
+    "fastapi>=0.115",
+    "uvicorn>=0.34",
+    "sqlalchemy[asyncio]>=2.0",
+    "aiosqlite>=0.20",
+    "pydantic-settings>=2.0",
+    "pillow>=12.0",
+    "bleak>=0.22",
+]
+
+[project.scripts]
+catprint-bot = "catprint_bot.main:main"
+
+[tool.uv]
+# cat-printer (https://github.com/NaitLee/Cat-Printer) must be cloned into ./cat-printer/
+# It is not published to PyPI.
