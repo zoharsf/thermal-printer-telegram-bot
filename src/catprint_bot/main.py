@@ -42,6 +42,8 @@ class JSONFormatter(logging.Formatter):
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(JSONFormatter())
 logging.basicConfig(level=logging.INFO, handlers=[handler])
+logging.getLogger("telegram").setLevel(logging.DEBUG)
+logging.getLogger("telegram.ext.Updater").setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -118,6 +120,11 @@ async def run() -> None:
     health_app = create_health_app(msg_repo=msg_repo, scheduler=scheduler)
     config = uvicorn.Config(health_app, host="0.0.0.0", port=8000, log_level="warning")
     server = uvicorn.Server(config)
+
+    async def error_handler(update, context) -> None:
+        logger.error("PTB error: %s", context.error, exc_info=context.error)
+
+    app.add_error_handler(error_handler)
 
     # Graceful shutdown
     shutdown_event = asyncio.Event()
