@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "catprint-bot"
+name = "thermal-printer-telegram-bot"
 version = "0.1.0"
 description = "Telegram bot that prints messages on a Bluetooth thermal printer"
 readme = "README.md"
@@ -29,7 +29,7 @@ dev = [
 ]
 
 [project.scripts]
-catprint-bot = "catprint_bot.main:main"
+thermal-printer-telegram-bot = "catprint_bot.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/catprint_bot"]

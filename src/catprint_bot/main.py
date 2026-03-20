@@ -169,7 +169,7 @@ async def run() -> None:
 
     # Start everything
     scheduler.start()
-    logger.info("Starting catprint-bot...")
+    logger.info("Starting thermal-printer-telegram-bot...")
 
     async with app:
         await app.start()

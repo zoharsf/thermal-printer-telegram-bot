@@ -18,7 +18,7 @@ def _get_disk_usage_percent() -> float:
 
 
 def create_health_app(*, msg_repo, scheduler) -> FastAPI:
-    app = FastAPI(title="catprint-bot", docs_url=None, redoc_url=None)
+    app = FastAPI(title="thermal-printer-telegram-bot", docs_url=None, redoc_url=None)
 
     @app.get("/health")
     async def health():

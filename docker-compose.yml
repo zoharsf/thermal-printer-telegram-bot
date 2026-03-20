@@ -1,5 +1,5 @@
 services:
-  catprint-bot:
+  thermal-printer-telegram-bot:
     build: .
     restart: always
     privileged: true
