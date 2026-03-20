@@ -50,6 +50,7 @@ class PrintService:
             await self._msg_repo.mark_failed(msg.id, reason=f"Render error: {exc}")
             return False
 
+        logger.info("Rendering complete for message %d, sending to printer...", msg.id)
         result = await self._driver.print_pbm(pbm)
 
         if result.success:

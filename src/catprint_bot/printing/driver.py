@@ -31,10 +31,15 @@ class PrintDriver:
         """Print PBM data to the thermal printer. Acquires the shared lock."""
         async with self._lock:
             try:
-                await self._do_print(pbm_data)
+                logger.info("Connecting to printer %s...", self._address)
+                await asyncio.wait_for(self._do_print(pbm_data), timeout=60.0)
+                logger.info("Print complete.")
                 return PrintResult(success=True)
+            except asyncio.TimeoutError:
+                logger.error("Print timed out after 60s — printer unreachable or stuck")
+                return PrintResult(success=False, error="Print timed out")
             except Exception as exc:
-                logger.error("Print failed: %s", exc)
+                logger.error("Print failed: %s", exc, exc_info=True)
                 return PrintResult(success=False, error=str(exc))
 
     async def _do_print(self, pbm_data: io.BytesIO) -> None:
@@ -53,8 +58,11 @@ class PrintDriver:
         driver.energy = int(self._energy * 0xFFFF)
 
         try:
+            logger.info("BLE connect start: %s", self._address)
             driver.connect(address=self._address)
+            logger.info("BLE connected, printing...")
             driver.print(pbm_data, mode="pbm")
+            logger.info("BLE print call returned.")
         finally:
             self._safe_unload(driver)
 
