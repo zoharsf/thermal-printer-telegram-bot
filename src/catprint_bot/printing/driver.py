@@ -69,11 +69,12 @@ class PrintDriver:
 
     async def check_connectivity(self) -> bool:
         """Quick check if the printer is reachable. Returns True if connectable."""
-        try:
-            result = await asyncio.to_thread(self._sync_check)
-            return result
-        except Exception:
-            return False
+        async with self._lock:
+            try:
+                result = await asyncio.to_thread(self._sync_check)
+                return result
+            except Exception:
+                return False
 
     def _sync_check(self) -> bool:
         """Try connect + immediate disconnect."""
