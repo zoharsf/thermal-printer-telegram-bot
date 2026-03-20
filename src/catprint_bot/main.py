@@ -39,16 +39,27 @@ class JSONFormatter(logging.Formatter):
         return _json.dumps(log_data)
 
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(JSONFormatter())
-logging.basicConfig(level=logging.INFO, handlers=[handler])
-logging.getLogger("telegram").setLevel(logging.DEBUG)
-logging.getLogger("telegram.ext.Updater").setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def _configure_logging(settings: Settings) -> None:
+    level = getattr(logging, settings.log_level.upper(), logging.INFO)
+    fmt_handler = logging.StreamHandler(sys.stdout)
+    if settings.log_format == "json":
+        fmt_handler.setFormatter(JSONFormatter())
+    else:
+        fmt_handler.setFormatter(
+            logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+        )
+    root = logging.getLogger()
+    root.setLevel(level)
+    root.handlers = [fmt_handler]
 
 
 async def run() -> None:
     settings = Settings()
+    _configure_logging(settings)
 
     # Database
     init_db(settings)
@@ -118,6 +129,7 @@ async def run() -> None:
     app.add_handler(CommandHandler("allowlist", handlers.cmd_allowlist))
     app.add_handler(CommandHandler("pause", handlers.cmd_pause))
     app.add_handler(CommandHandler("resume", handlers.cmd_resume))
+    app.add_handler(CommandHandler("reprint", handlers.cmd_reprint))
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, handlers.handle_message))
 
     # FastAPI

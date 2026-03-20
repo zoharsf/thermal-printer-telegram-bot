@@ -155,7 +155,8 @@ class BotHandlers:
                 "Commands:\n"
                 "/status — printer status & queue\n"
                 "/flush — print all queued messages now\n"
-                "/queue — view pending messages\n"
+                "/queue — view pending messages (with images)\n"
+                "/reprint <id> — reprint a message by ID\n"
                 "/history [n] — recent prints\n"
                 "/allow <user_id> — add user\n"
                 "/remove <user_id> — remove user\n"
@@ -197,11 +198,29 @@ class BotHandlers:
         if not pending:
             await update.message.reply_text("No pending messages.")
             return
-        lines = []
+        from pathlib import Path
         for msg in pending[:20]:
-            preview = (msg.text_content or "[image]")[:50]
-            lines.append(f"#{msg.id} from {msg.telegram_display_name}: {preview}")
-        await update.message.reply_text("\n".join(lines))
+            name = msg.telegram_display_name
+            if msg.content_type == "image" and msg.image_path:
+                image_file = Path(msg.image_path)
+                if image_file.exists():
+                    with open(image_file, "rb") as f:
+                        await update.message.reply_photo(
+                            photo=f,
+                            caption=f"*#{msg.id}* from {name}",
+                            parse_mode="Markdown",
+                        )
+                else:
+                    await update.message.reply_text(
+                        f"*#{msg.id}* from {name}: \\[image file missing\\]",
+                        parse_mode="Markdown",
+                    )
+            else:
+                preview = (msg.text_content or "")[:50]
+                await update.message.reply_text(
+                    f"*#{msg.id}* from {name}: {preview}",
+                    parse_mode="Markdown",
+                )
 
     async def cmd_history(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not await self._require_admin(update):
@@ -270,6 +289,28 @@ class BotHandlers:
             name = f"@{u.telegram_username}" if u.telegram_username else str(u.telegram_user_id)
             lines.append(f"  {name} (ID: {u.telegram_user_id})")
         await update.message.reply_text("Allowed users:\n" + "\n".join(lines))
+
+    async def cmd_reprint(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        if not await self._require_admin(update):
+            return
+        if not context.args:
+            await update.message.reply_text("Usage: /reprint <message_id>")
+            return
+        try:
+            message_id = int(context.args[0])
+        except ValueError:
+            await update.message.reply_text("Message ID must be a number.")
+            return
+        msg = await self._msg_repo.get_by_id(message_id)
+        if not msg:
+            await update.message.reply_text(f"Message #{message_id} not found.")
+            return
+        await update.message.reply_text(f"Reprinting message #{message_id}...")
+        success = await self._print_service.print_message(msg)
+        if success:
+            await update.message.reply_text(f"Message #{message_id} reprinted!")
+        else:
+            await update.message.reply_text(f"Failed to reprint #{message_id} — queued for retry.")
 
     async def cmd_pause(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not await self._require_admin(update):

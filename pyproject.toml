@@ -17,6 +17,7 @@ dependencies = [
     "pydantic-settings>=2.0",
     "pillow>=12.0",
     "bleak>=0.22",
+    "python-bidi>=0.6",
 ]
 
 [project.optional-dependencies]

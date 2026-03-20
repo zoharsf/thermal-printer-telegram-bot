@@ -7,6 +7,7 @@ from __future__ import annotations
 import io
 from pathlib import Path
 
+from bidi.algorithm import get_display
 from PIL import Image, ImageDraw, ImageFont
 
 PAPER_WIDTH = 384
@@ -43,6 +44,7 @@ def _wrap_text(text: str, max_width: int, font) -> list[str]:
         if not paragraph.strip():
             lines.append("")
             continue
+        paragraph = get_display(paragraph)
         line = ""
         for word in paragraph.split():
             candidate = f"{line} {word}".strip()

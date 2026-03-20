@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     printer_energy: float = 0.75
     printer_font_size: int = 14
 
+    # Logging
+    log_level: str = "INFO"
+    log_format: str = "text"  # "text" or "json"
+
     # Retry
     retry_interval_seconds: int = 600
     retry_backoff_seconds: int = 1800
