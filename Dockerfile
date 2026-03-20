@@ -21,6 +21,9 @@ COPY src/ src/
 
 RUN mkdir -p /data/images
 
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["uv", "run", "python", "-m", "catprint_bot.main"]
+CMD ["./entrypoint.sh"]

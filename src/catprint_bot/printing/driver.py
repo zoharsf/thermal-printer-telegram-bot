@@ -8,9 +8,7 @@ from __future__ import annotations
 import asyncio
 import io
 import logging
-import subprocess
 import sys
-import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -60,11 +58,6 @@ class PrintDriver:
         driver.energy = int(self._energy * 0xFFFF)
 
         try:
-            logger.info("Resetting BLE adapter before connect...")
-            subprocess.run(["hciconfig", "hci0", "down"], check=False, timeout=5)
-            subprocess.run(["hciconfig", "hci0", "up"], check=False, timeout=5)
-            time.sleep(3)  # let adapter warm up and device become discoverable
-            # Give cat-printer more time to scan and connect after a cold adapter
             driver.connection_timeout = 20
             logger.info("BLE connect start: %s", self._address)
             driver.connect(address=self._address)
