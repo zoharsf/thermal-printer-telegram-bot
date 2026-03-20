@@ -121,6 +121,12 @@ class AllowedUserRepository:
         await self._session.refresh(user)
         return user
 
+    async def update_username(self, telegram_user_id: int, username: str | None) -> None:
+        user = await self._session.get(AllowedUser, telegram_user_id)
+        if user and user.telegram_username != username:
+            user.telegram_username = username
+            await self._session.commit()
+
     async def remove(self, telegram_user_id: int) -> bool:
         user = await self._session.get(AllowedUser, telegram_user_id)
         if user:

@@ -60,6 +60,8 @@ class BotHandlers:
             )
             return
 
+        await self._user_repo.update_username(user.id, user.username)
+
         if update.message.photo:
             await self._handle_image(update, context)
         elif update.message.text:
@@ -286,8 +288,8 @@ class BotHandlers:
             return
         lines = []
         for u in users:
-            name = f"@{u.telegram_username}" if u.telegram_username else str(u.telegram_user_id)
-            lines.append(f"  {name} (ID: {u.telegram_user_id})")
+            username = f"@{u.telegram_username}" if u.telegram_username else "(no username)"
+            lines.append(f"• {username} — ID: {u.telegram_user_id}")
         await update.message.reply_text("Allowed users:\n" + "\n".join(lines))
 
     async def cmd_reprint(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
