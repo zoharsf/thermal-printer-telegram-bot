@@ -49,8 +49,11 @@ class _TokenRedactor(logging.Filter):
         self._token = token
 
     def filter(self, record: logging.LogRecord) -> bool:
-        record.msg = str(record.msg).replace(self._token, "***")
-        record.args = None
+        if record.args:
+            record.msg = record.getMessage().replace(self._token, "***")
+            record.args = None
+        else:
+            record.msg = str(record.msg).replace(self._token, "***")
         return True
 
 
