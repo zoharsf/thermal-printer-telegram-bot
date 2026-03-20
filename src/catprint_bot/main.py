@@ -43,6 +43,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+class _TokenRedactor(logging.Filter):
+    def __init__(self, token: str) -> None:
+        super().__init__()
+        self._token = token
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.msg = str(record.msg).replace(self._token, "***")
+        record.args = None
+        return True
+
+
 def _configure_logging(settings: Settings) -> None:
     level = getattr(logging, settings.log_level.upper(), logging.INFO)
     fmt_handler = logging.StreamHandler(sys.stdout)
@@ -52,6 +63,7 @@ def _configure_logging(settings: Settings) -> None:
         fmt_handler.setFormatter(
             logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
         )
+    fmt_handler.addFilter(_TokenRedactor(settings.telegram_bot_token))
     root = logging.getLogger()
     root.setLevel(level)
     root.handlers = [fmt_handler]
