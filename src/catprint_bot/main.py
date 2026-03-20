@@ -96,11 +96,15 @@ async def run() -> None:
     )
 
     # Telegram bot application
+    # PTB v21 uses separate HTTP connections for regular calls and getUpdates.
+    # The getUpdates long-poll API timeout is 10s, so read_timeout must exceed it.
     request = HTTPXRequest(connect_timeout=30.0, read_timeout=30.0, write_timeout=30.0)
+    get_updates_request = HTTPXRequest(connect_timeout=30.0, read_timeout=15.0)
     app = (
         ApplicationBuilder()
         .token(settings.telegram_bot_token)
         .request(request)
+        .get_updates_request(get_updates_request)
         .build()
     )
 
